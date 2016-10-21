@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SmartPlug</string>
+    <string name="shinki_button">新規登録</string>
+    <string name="login_button">ログイン</string>
+    <color name="white">#FFFFFF</color>
+    <color name="back">#C9CACA</color>
+    <string name="menu_user">ユーザ設定</string>
+    <string name="menu_add">コンセント追加</string>
+    <string name="menu_del">コンセント削除</string>
+    <string name="menu_logout">ログアウト</string>
+</resources>

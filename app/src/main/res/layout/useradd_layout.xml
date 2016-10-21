@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="6"
+        android:background="@color/back">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:id="@+id/imageView"
+            android:src="@drawable/smartplug_top"/>
+
+        <TextView
+            android:text="IDとパスワードを入力してね"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"
+            android:id="@+id/NavitextView"
+            android:gravity="center"
+            android:layout_weight="1"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/IDtextView"
+            android:hint=" ID"
+            android:textSize="30dp"
+            android:background="@drawable/newtouroku"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentStart="true"
+            android:layout_weight="1"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/PASStextView"
+            android:background="@drawable/newtouroku"
+            android:hint=" PASSWORD"
+            android:textSize="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentStart="true"
+            android:layout_weight="1"/>
+
+        <Button
+            android:text="次へ"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/Nextbutton"
+            android:textSize="30dp"
+            android:layout_weight="2" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

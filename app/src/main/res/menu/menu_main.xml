@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:resauto="http://schemas.android.com/apk/res-auto">
+
+    <!--ユーザ設定-->
+    <item
+        android:id="@+id/menu_user"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="100"
+        android:title="@string/menu_user"
+        resauto:showAsAction="never" />
+    <!--コンセント追加-->
+    <item
+        android:id="@+id/menu_add"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="100"
+        android:title="@string/menu_add"
+        resauto:showAsAction="never" />
+    <!--コンセント削除-->
+    <item
+        android:id="@+id/menu_del"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="100"
+        android:title="@string/menu_del"
+        resauto:showAsAction="never" />
+    <!--ログアウト-->
+    <item
+        android:id="@+id/menu_logout"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="100"
+        android:title="@string/menu_logout"
+        resauto:showAsAction="never" />
+</menu>
