@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.github.mikephil.charting.charts.CombinedChart;
 
@@ -21,7 +22,29 @@ public class HomeActivity extends AppCompatActivity {
 
         //Chartの作成
         Chart chart = new Chart((CombinedChart) findViewById(R.id.chart));
+
+        findViewById(R.id.timerButton).setOnClickListener(timer_click); //タイマーボタン押下
+        findViewById(R.id.configButton).setOnClickListener(config_click); //設定ボタン押下
     }
+
+    View.OnClickListener timer_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            Intent intent = new Intent(getApplication(), TimerActivity.class); //Next Activity
+            startActivity(intent);
+        }
+    };
+
+    View.OnClickListener config_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            Intent intent = new Intent(getApplication(), ConfigActivity.class); //Next Activity
+            startActivity(intent);
+        }
+    };
+
     //ハンバーガーメニュー
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

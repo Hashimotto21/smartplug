@@ -13,16 +13,49 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?android:actionBarSize"
-
-        >
+        android:minHeight="?android:actionBarSize">
     </android.support.v7.widget.Toolbar>
 
-    <com.github.mikephil.charting.charts.CombinedChart
-        android:id="@+id/chart"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_margin="0dp"
-        />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <com.github.mikephil.charting.charts.CombinedChart
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_margin="0dp"
+            />
+
+        <TextView
+            android:id="@+id/PriceTextBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/chart"
+            android:text="金額表示"
+            android:textSize="25dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+            <Button
+                android:id="@+id/timerButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="タイマー"/>
+
+            <Button
+                android:id="@+id/configButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="設定"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
 
 </RelativeLayout>

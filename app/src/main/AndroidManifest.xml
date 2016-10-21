@@ -34,6 +34,9 @@
         <activity android:name=".LogoutActivity"
             android:parentActivityName=".HomeActivity"></activity>
 
+        <activity android:name=".TimerActivity"></activity>
+        <activity android:name=".ConfigActivity"></activity>
+
     </application>
 
 </manifest>
