@@ -35,16 +35,19 @@ public class Chart {
                 CombinedChart.DrawOrder.BAR, CombinedChart.DrawOrder.BUBBLE, CombinedChart.DrawOrder.CANDLE, CombinedChart.DrawOrder.LINE, CombinedChart.DrawOrder.SCATTER
         });
 
+        //右軸
         YAxis rightAxis = mChart.getAxisRight();
         rightAxis.setDrawGridLines(false);
         rightAxis.setAxisMinValue(0f); // this replaces setStartAtZero(true)
 
+        //左軸
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setDrawGridLines(false);
         leftAxis.setAxisMinValue(0f); // this replaces setStartAtZero(true)
 
+        //横軸の表示
         XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 
         ArrayList<String> xValues = new ArrayList<>();
         xValues.add("1月");
@@ -75,9 +78,11 @@ public class Chart {
 
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
+        //データ追加（データ、X軸の値？）
         for (int index = 0; index < itemcount; index++)
             entries.add(new Entry(getRandom(15, 10), index));
 
+        //（データの集合、表示するデータの説明）
         LineDataSet set = new LineDataSet(entries, "Line DataSet");
         set.setColor(Color.rgb(240, 238, 70));
         set.setLineWidth(2.5f);
@@ -89,6 +94,7 @@ public class Chart {
         set.setValueTextSize(10f);
         set.setValueTextColor(Color.rgb(240, 238, 70));
 
+        //データの説明の表示位置
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
 
         d.addDataSet(set);
