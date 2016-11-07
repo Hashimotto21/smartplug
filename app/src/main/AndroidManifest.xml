@@ -27,6 +27,10 @@
         <activity android:name=".HomeActivity">
 
         </activity>
+
+        <activity android:name=".TimerActivity"></activity>
+        <activity android:name=".ConfigActivity"></activity>
+
         <activity android:name=".UserConfigActivity"
             android:parentActivityName=".HomeActivity"></activity>
         <activity android:name=".PlugAddMoreActivity"
@@ -36,8 +40,8 @@
         <activity android:name=".LogoutActivity"
             android:parentActivityName=".HomeActivity"></activity>
 
-        <activity android:name=".TimerActivity"></activity>
-        <activity android:name=".ConfigActivity"></activity>
+        <activity android:name=".ChangePasswordActivity"
+            android:parentActivityName=".UserConfigActivity"></activity>
 
     </application>
 

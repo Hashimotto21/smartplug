@@ -1,5 +1,7 @@
 package com.example.a2140252.smartplug;
 
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,26 +28,32 @@ public class MyHttpClient {
     boolean re; //connect()の戻り値
     String msg;
 
-    public MyHttpClient(String url) {
-        this.url = url;
+    public MyHttpClient() {
+
     }
 
-    public boolean login() {
+    public boolean login(String urlString) {
+        url = urlString;
         AsyncHttpClient client = new AsyncHttpClient(); //通信準備
         client.post(url, params, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    String str = "userid:" + response.getString("userid"); // "user"
-                    str += "\npass:" + response.getString("pass"); // "pass"
+                    String str = "user_id:" + response.getString("user_id"); // "user"
+                    str += "\npassword:" + response.getString("password"); // "pass"
                     str += "\nbool:" + response.getString("bool"); // "passが正しいか"
 
-                    re = true;
+                    Log.d("onSuccess:", str);
+
                     if (response.getString("bool").equals("false")) {
                         re = false;
                         msg = "パスワードが間違っています。";
+                    } else {
+                        re = true;
                     }
-                    Log.d("onSuccess:", str);
+
+                    Log.d("onSuccess:", re + msg);
+
                 } catch (Exception e) {
                     msg = "システムエラー";
                 }
@@ -61,18 +69,19 @@ public class MyHttpClient {
         return re;
     }
 
-    public boolean registerUser() {
+    public boolean registerUser(String urlString) {
+        url = urlString;
         AsyncHttpClient client = new AsyncHttpClient(); //通信準備
         client.post(url, params, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    String str = "userid:" + response.getString("userid"); // "user"
-                    str += "\npass:" + response.getString("pass"); // "pass"
-                    str += "\nbool:" + response.getString("bool"); // "passが正しいか"
+                    String str = "userid:" + response.getString("user_id"); // "user"
+                    str += "\npass:" + response.getString("password"); // "pass"
+                    str += "\nstatus:" + response.getString("status"); // "passが正しいか"
 
                     re = true;
-                    if (response.getString("bool").equals("false")) {
+                    if (response.getString("status").equals("false")) {
                         re = false;
                         msg = "パスワードが間違っています。";
                     }
@@ -83,8 +92,8 @@ public class MyHttpClient {
             }
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
+            public void onFailure(int statusCode, Header[] headers,  String errorStrings, Throwable throwable) {
+                super.onFailure(statusCode, headers, errorStrings, throwable);
                 msg = "接続エラー";
             }
         });
@@ -99,4 +108,5 @@ public class MyHttpClient {
     public void removeParam(String key) {
         params.remove(key);
     }
+
 }
