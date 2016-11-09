@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +30,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_password_layout);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         findViewById(R.id.ChangePasswordButton).setOnClickListener(changePassButton); //パスワード変更ボタン押下
     }
@@ -80,6 +86,10 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }
         if (!newpass.getText().toString().equals(confirmpass.getText().toString())) {
             Toast.makeText(this, "新しいPASSWORDが一致していません。再入力してください。", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(!oldpass.getText().toString().equals(newpass.getText().toString())) {
+            Toast.makeText(this, "現在のPASSWORDと同じPASSWORDには変更できません。", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

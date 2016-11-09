@@ -60,10 +60,6 @@ public class PlugAddActivity extends AppCompatActivity {
             client.removeParam("plug_id");
             client.removeParam("name");
             client.removeParam("user_id");
-
-            Intent intent = new Intent(getApplication(), HomeActivity.class); //HomeActivity
-            startActivity(intent);
-            PlugAddActivity.this.finish();
         }
     };
 

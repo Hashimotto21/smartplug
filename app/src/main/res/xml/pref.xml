@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="電力異常時に">
+        <SwitchPreference
+            android:key="notice_checkBox1"
+            android:title="通知する"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="alert_checkBox1"
+            android:title="アラートする"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="Auto_checkBox1"
+            android:title="自動電源"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="温度異常時に">
+        <SwitchPreference
+            android:key="notice_checkBox2"
+            android:title="通知する"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="alert_checkBox2"
+            android:title="アラートする"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="Auto_checkBox2"
+            android:title="自動電源"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="災害時に">
+        <SwitchPreference
+            android:key="notice_checkBox3"
+            android:title="通知する"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="alert_checkBox3"
+            android:title="アラートする"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+        <SwitchPreference
+            android:key="Auto_checkBox3"
+            android:title="自動電源"
+            android:summaryOn="ON"
+            android:summaryOff="OFF"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>
