@@ -16,18 +16,6 @@
         >
 
         <!--グラフ-->
-<!--
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#ffff00"
-            android:id="@+id/imageView"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            >
-        </ImageView>
--->
-
         <com.github.mikephil.charting.charts.CombinedChart
             android:id="@+id/chart"
             android:layout_width="match_parent"
@@ -83,14 +71,14 @@
             android:layout_marginTop="10dp"
             />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <Button
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/textview1"
-            android:layout_alignBottom="@+id/imageView"
-            android:layout_centerHorizontal="true" />
-
+            android:text="電源を切る"
+            android:id="@+id/StopButton"
+            android:layout_below="@+id/StartButton"
+            android:layout_marginTop="10dp"
+            />
 
     </RelativeLayout>
 

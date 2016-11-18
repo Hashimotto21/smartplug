@@ -56,7 +56,7 @@ public class PlugAddActivity extends AppCompatActivity {
             client.setParam("name", name.getText().toString());
             client.setParam("user_id", user_id);
 
-            client.registerUser("http://smartplug.php.xdomain.jp/register_plug.php");
+            client.registerPlug("http://smartplug.php.xdomain.jp/register_plug.php");
             client.removeParam("plug_id");
             client.removeParam("name");
             client.removeParam("user_id");
@@ -85,7 +85,7 @@ public class PlugAddActivity extends AppCompatActivity {
         String msg;
 
 
-        public void registerUser(String urlString) {
+        public void registerPlug(String urlString) {
             url = urlString;
             AsyncHttpClient client = new AsyncHttpClient(); //通信準備
             client.post(url, params, new JsonHttpResponseHandler(){
@@ -99,9 +99,22 @@ public class PlugAddActivity extends AppCompatActivity {
                             msg = "入力されたプラグIDは既に登録されています。";
                             Toast.makeText(PlugAddActivity.this, status + msg, Toast.LENGTH_LONG).show();
                         } else {
+                            //PlugIdは保持したくない
+//                            SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+//                            String user_id = data.getString("user_id", "");
+//                            data = getSharedPreferences(user_id, Context.MODE_PRIVATE);
+//                            SharedPreferences.Editor editor = data.edit();
+//                            int count = data.getInt("count", 0);
+//                            EditText id = (EditText) findViewById(R.id.IDtextView);
+//                            EditText name = (EditText) findViewById(R.id.NametextView);
+//                            editor.putString("plug_id_" + String.valueOf(count), id.getText().toString());
+//                            editor.putString("plug_name_" + String.valueOf(count), name.getText().toString());
+//                            editor.putInt("count", count + 1);
+//                            editor.apply();
+
                             msg = "登録されました。";
                             Toast.makeText(PlugAddActivity.this, status + msg, Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(getApplication(), HomeActivity.class); //Homectivity
+                            Intent intent = new Intent(getApplication(), HomeActivity.class);
                             startActivity(intent);
                             PlugAddActivity.this.finish();
                         }

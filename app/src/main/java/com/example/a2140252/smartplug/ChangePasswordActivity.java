@@ -61,7 +61,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
             client.setParam("old_pass", oldPass.getText().toString());
             client.setParam("new_pass", newPass.getText().toString());
 
-            client.login("http://smartplug.php.xdomain.jp/change_password.php");
+            client.changePassword("http://smartplug.php.xdomain.jp/change_password.php");
             client.removeParam("user_id");
             client.removeParam("old_pass");
             client.removeParam("new_pass");
@@ -102,7 +102,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String msg;
 
 
-        public void login(String urlString) {
+        public void changePassword(String urlString) {
             url = urlString;
             AsyncHttpClient client = new AsyncHttpClient(); //通信準備
             client.post(url, params, new JsonHttpResponseHandler() {

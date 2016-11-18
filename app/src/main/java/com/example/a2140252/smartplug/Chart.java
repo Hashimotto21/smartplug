@@ -29,6 +29,7 @@ public class Chart {
         mChart.setBackgroundColor(Color.WHITE);
         mChart.setDrawGridBackground(false);
         mChart.setDrawBarShadow(false);
+        mChart.setDoubleTapToZoomEnabled(false);
 
         // draw bars behind lines
         mChart.setDrawOrder(new CombinedChart.DrawOrder[] {

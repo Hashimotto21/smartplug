@@ -30,6 +30,11 @@ public class TopActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplication(), LoginActivity.class); //Next Activity
             startActivity(intent);
             TopActivity.this.finish();
+
+            //デバッグ用コード
+//            Intent intent = new Intent(getApplication(), HomeActivity.class); //Next Activity
+//            startActivity(intent);
+//            TopActivity.this.finish();
         }
     };
 

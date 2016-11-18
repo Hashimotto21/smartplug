@@ -3,13 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?android:actionBarSize"
-        android:background="@color/colorPrimary" />
-
     <TextView
         android:text="追加したいコンセント情報を登録してね"
         android:layout_width="match_parent"
@@ -25,11 +18,13 @@
         android:id="@+id/IDtextView"
         android:hint="ID"
         android:textSize="30dp"
+        android:inputType="text"
         android:background="@drawable/newtouroku"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:layout_alignParentStart="true"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:maxLength="10"/><!--１０桁　に制限-->
 
     <EditText
         android:layout_width="match_parent"
@@ -38,10 +33,12 @@
         android:background="@drawable/newtouroku"
         android:hint="name"
         android:textSize="30dp"
+        android:inputType="text"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:layout_alignParentStart="true"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:maxLength="16"/><!--16桁　に制限-->
 
     <Button
         android:text="コンセントを追加する"

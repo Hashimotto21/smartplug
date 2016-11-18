@@ -1,32 +1,48 @@
 package com.example.a2140252.smartplug;
 
-
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.content.SharedPreferences;
+import android.provider.ContactsContract;
 import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.CombinedChart;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.security.acl.Group;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by 2140252 on 2016/10/17.
- */
-public class HomeActivity extends AppCompatActivity {
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.client.HttpClient;
+
+
+public class HomeActivity extends AppCompatActivity {//AppCompatActivity FragmentActivity
+
     private static final int ADDMORE_CODE = 1;
     private static final int DELETE_CODE = 2;
-    //private Toolbar toolbar;
+
+
     CustomFragmentPagerAdapter adapter;
 
-    ArrayList<PageItem> list;// = adapter.getList();
+    ArrayList<PageItem> list;
 
     ViewPager pager;
 
@@ -42,109 +58,80 @@ public class HomeActivity extends AppCompatActivity {
         //ViewPager
         pager = (ViewPager) findViewById(R.id.pager);
 
-        // PagerTitleStrip のカスタマイズ   ？？----
+        // PagerTitleStrip のカスタマイズ   ----
         PagerTabStrip strip = (PagerTabStrip) findViewById(R.id.strip);
-        strip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        strip.setTextColor(0xff9acd32);
-        //strip.setTextColor(0xff0000);
+        strip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25);
+        strip.setTextColor(0xFF303F9F);
         strip.setTextSpacing(50);
         strip.setNonPrimaryAlpha(0.3f);
         strip.setDrawFullUnderline(true);//下線表示
-        strip.setTabIndicatorColor(0xff9acd32);//インディケーターと下線の色
+        strip.setTabIndicatorColor(0x303F9F);//インディケーターの色
         //-----------------
 
-        //初期表示のタブ 1,2-----
-        // タブ 1
-        PageItem plug1 = new PageItem("1",111);
+        list = adapter.getList();//ArrayList生成
+//        //初期表示のタブ 1,2-----
+//        // タブ 1
+//        PageItem plug1 = new PageItem("1","111");//("タイトル","id")
+//        adapter.addItem(plug1);//ArrayListにPageItemを格納
+//        //タブ 2
+//        PageItem plug2 = new PageItem("2","222");
+//        adapter.addItem(plug2);//ArrayListにPageItemを格納
+//
+//        pager.setAdapter(adapter);
+//        //------------------------------
+//
+//        //タブ切り替えた時　 Logを残すためのメソッド -------------------------------
+//        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+//            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+//            @Override
+//            public void onPageScrollStateChanged(int state) {
+//                if (ViewPager.SCROLL_STATE_IDLE == state) {//ViewPagerの位置が落ち着いた状態が0(= CROLL_STATE_IDLE)
+//
+//                    Log.d("ViewPager", "現在選択中のタブ" + ( pager.getCurrentItem() + 1) + "つ目 -------");
+//
+//                }
+//            }
+//        });
+        //---------------------------------
 
-        list = adapter.getList();
-        Log.d("Home","onCreate() getList();後");
-        adapter.addItem(plug1);
-        Log.d("Home","onCreate() adapter.addItem(plug1);後");
-        //タブ 2
-        PageItem plug2 = new PageItem("2",222);
+        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+        String user_id = data.getString("user_id", "");
+        MyHttpClient client = new MyHttpClient();
+        client.setParam("user_id", user_id);
+        Log.d("onClick", "通信前");
+        client.getGraphData("http://smartplug.php.xdomain.jp/get_graph_data.php");
+        client.removeParam("user_id");
 
-        adapter.addItem(plug2);
-//////////////
-        /*
-        Intent intent = new Intent(this, UserConfigActivity.class);
-        ArrayList<a> lista = new  ArrayList<a>();
-        lista.add(new a());
-        Bundle bundle = new Bundle();
-        // bundle.putExtra(list2);
-        bundle.putSerializable("a",lista);
-        */
-        //
-        /*
-        List<PageItem> list2 = new  ArrayList<PageItem>();
-        List<String> list3 = new  ArrayList<String>();
-        list3.add("33");
-        PageItem p1 = new PageItem();
-        p1.title ="11";
-        list2.add(p1);
-        Bundle bundle = new Bundle();
-       // bundle.putExtra(list2);
-       // startActivityForResult(intent, list2);
-       // intent.putExtra("2",list2);
-        intent.putExtra("111",list3);
-        bundle.putSerializable("2",list2);
-        intent.putParcelableArrayListExtra("key", list2);
-        intent.putExtra("bundle",bundle);
-        ArrayList<Group> ag;
-        ag.add(new PageItem("2",333));
-        Intent .putExtra("ag", ag);
-        startActivity(intent);*/
-////////////////////////
 
-        Log.d("Home", "onCreate() adapter.addItem(plug2)後");
-        pager.setAdapter(adapter);
-        //------------------------------
-        Log.d("Home", "●onCreate() pager.setAdapter(adapter);後 ");
-
-        //タブ切り替えた-------------------------------
-        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                if (ViewPager.SCROLL_STATE_IDLE == state) {
-                    int a = pager.getCurrentItem();
-
-                    Log.d("ViewPager", "現在選択中のタブ" + (a + 1) + "つ目 --★-----");//ViewPagerの位置が落ち着いた状態が0(=SCROLL_STATE_IDLE)
-
-                }
-            }
-        });
-    }
+    }//onCreate()
 
     //HomeActivityのインスタンスが既に存在している場合
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         switch(requestCode) {//startActivityForResult(intent,1);の１か？
 
-            case (ADDMORE_CODE)://PlugAddMoreActivity()から戻ってきた
+            case (ADDMORE_CODE)://ADDMORE_CODE = 1  PlugAddMoreActivity()から戻ってきたら
                 if (resultCode == RESULT_OK) {
                     //「コンセントを追加する」ボタンを押して戻ってきたときの処理
 
                     adapter.addItem((PageItem) data.getSerializableExtra("newPlug"));
                     pager.setAdapter(adapter);
                     Log.d("onActivityResult", "タブ追加後★RESULT_OK");
-                } else if (resultCode == RESULT_CANCELED) {
-                    //戻る▽ボタンを押して戻ってきたときの処理
-                    //なにもしない
-                    Log.d("onActivityResult", "タブ追加後★RESULT_CANCELED");
-
                 }
                 break;
-            case(DELETE_CODE)://PlugDeleteActivity()から戻ってきた
+            case(DELETE_CODE)://DELETE_CODE = 2  PlugDeleteActivity()から戻ってきたら
                 if (resultCode == RESULT_OK) {
                     //「コンセントを削除する」ボタンを押して戻ってきたときの処理
+                    int d  =Integer.parseInt(data.getSerializableExtra("delete").toString());
+
+                    adapter.Delete(d);//ArrayList から削除
+
+                    adapter.destroyAllItem(pager);//削除
+                    Log.d("onActivityResult", "adapter.destroyAllItem(pager);　後");
+                    adapter.notifyDataSetChanged();
+                    pager.setAdapter(adapter);
 
                     Log.d("onActivityResult", "タブ削除後★RESULT_OK");
-                } else if (resultCode == RESULT_CANCELED) {
-                    //戻る▽ボタンを押して戻ってきたときの処理
-
-                    Log.d("onActivityResult", "タブ削除後★RESULT_CANCELED");
-
                 }
                 break;
             default:
@@ -152,31 +139,103 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    public class MyHttpClient {
+
+        String url; //接続先url
+        final RequestParams params = new RequestParams(); //リクエストパラメータ
+        String msg;
+
+
+        public void getGraphData(String urlString) {
+            url = urlString;
+            AsyncHttpClient client = new AsyncHttpClient(); //通信準備
+            client.post(url, params, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    try {
+                        //Toast.makeText(getApplicationContext(), response.getJSONObject(0).get("plug_id_1").toString(), Toast.LENGTH_LONG).show();
+                        //Log.d("HomeActivity", response.getJSONArray("plug").getJSONObject(0).getString("id"));
+                        int count = Integer.parseInt(response.getString("count"));
+                        //プラグ追加
+                        for (int i = 0; i < count; i++) {
+                            String id = response.getJSONArray("plug").getJSONObject(i).getString("id");
+                            String name = response.getJSONArray("plug").getJSONObject(i).getString("name");
+                            PageItem plug = new PageItem(name, id);//("タイトル","id")
+                            adapter.addItem(plug);
+                        }
+//                        Toast.makeText(getApplicationContext(), String.valueOf(count) + ", " + response.getString("plug_id_1"), Toast.LENGTH_LONG).show();
+                        pager.setAdapter(adapter);
+                        //タブ切り替えた時　 Logを残すためのメソッド -------------------------------
+                        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                            @Override
+                            public void onPageScrollStateChanged(int state) {
+                                if (ViewPager.SCROLL_STATE_IDLE == state) {//ViewPagerの位置が落ち着いた状態が0(= CROLL_STATE_IDLE)
+
+                                    Log.d("ViewPager", "現在選択中のタブ" + ( pager.getCurrentItem() + 1) + "つ目 -------");
+
+                                }
+                            }
+                        });
+
+//
+                    } catch (Exception e) {
+                        msg = "システムエラー";
+                        Toast.makeText(getApplicationContext(), msg + e.toString(), Toast.LENGTH_LONG).show();
+                        Log.d("Exception", e.toString());
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers,  String errorStrings, Throwable throwable) {
+                    super.onFailure(statusCode, headers, errorStrings, throwable);
+                    msg = "接続エラー";
+                    Toast.makeText(getApplicationContext(), errorStrings, Toast.LENGTH_LONG).show();
+                }
+            });
+
+        }
+
+        public void setParam(String key, String value) {
+            params.put(key, value);
+        }
+
+        public void removeParam(String key) {
+            params.remove(key);
+        }
+
+    }
+
     //ハンバーガーメニュー
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        return  true;
-
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
-        switch(item.getItemId()) {
+
+        switch (item.getItemId()) {
             case R.id.menu_user:
                 intent = new Intent(this, UserConfigActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.menu_add:
                 intent = new Intent(this, PlugAddMoreActivity.class);
-                startActivity(intent);
+                list= adapter.getList();
+                intent.putExtra("list",list);//ArrayListを渡す
+
+                startActivityForResult(intent, ADDMORE_CODE);//起動先からデータを返してもらえる
                 return true;
             case R.id.menu_del:
                 intent = new Intent(this, PlugDeleteActivity.class);
-                startActivity(intent);
+                list= adapter.getList();
+                intent.putExtra("list",list);//ArrayListを渡す
+
+                startActivityForResult(intent,DELETE_CODE);
                 return true;
             case R.id.menu_logout:
                 intent = new Intent(this, LogoutActivity.class);
@@ -187,4 +246,5 @@ public class HomeActivity extends AppCompatActivity {
         }
         return false;
     }
+
 }
