@@ -14,6 +14,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -46,6 +47,8 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
 
     ViewPager pager;
 
+    ConfigItem configItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,30 +72,9 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
         //-----------------
 
         list = adapter.getList();//ArrayList生成
-//        //初期表示のタブ 1,2-----
-//        // タブ 1
-//        PageItem plug1 = new PageItem("1","111");//("タイトル","id")
-//        adapter.addItem(plug1);//ArrayListにPageItemを格納
-//        //タブ 2
-//        PageItem plug2 = new PageItem("2","222");
-//        adapter.addItem(plug2);//ArrayListにPageItemを格納
-//
-//        pager.setAdapter(adapter);
-//        //------------------------------
-//
-//        //タブ切り替えた時　 Logを残すためのメソッド -------------------------------
-//        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-//            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-//            @Override
-//            public void onPageScrollStateChanged(int state) {
-//                if (ViewPager.SCROLL_STATE_IDLE == state) {//ViewPagerの位置が落ち着いた状態が0(= CROLL_STATE_IDLE)
-//
-//                    Log.d("ViewPager", "現在選択中のタブ" + ( pager.getCurrentItem() + 1) + "つ目 -------");
-//
-//                }
-//            }
-//        });
         //---------------------------------
+
+        configItem=(ConfigItem) this.getApplication();
 
         SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
         String user_id = data.getString("user_id", "");
@@ -113,9 +95,17 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
             case (ADDMORE_CODE)://ADDMORE_CODE = 1  PlugAddMoreActivity()から戻ってきたら
                 if (resultCode == RESULT_OK) {
                     //「コンセントを追加する」ボタンを押して戻ってきたときの処理
-
-                    adapter.addItem((PageItem) data.getSerializableExtra("newPlug"));
+                    Intent intent = getIntent();
+                    String id = intent.getStringExtra("id");
+                    String name = intent.getStringExtra("name");
+                    PageItem pageItem = new PageItem(name, id);
+                    adapter.addItem(pageItem);
+                    //adapter.addItem((PageItem) data.getSerializableExtra("newPlug"));
                     pager.setAdapter(adapter);
+
+                    //設定ボタンのON/OFF
+                    Boolean[] config3 ={false,false,false,false,false,false,false,false,false};
+                    configItem.cList.add(config3);
                     Log.d("onActivityResult", "タブ追加後★RESULT_OK");
                 }
                 break;
@@ -131,6 +121,8 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
                     adapter.notifyDataSetChanged();
                     pager.setAdapter(adapter);
 
+                    //設定ON/OFFの情報も削除
+                    configItem.cList.remove(d);
                     Log.d("onActivityResult", "タブ削除後★RESULT_OK");
                 }
                 break;
@@ -162,7 +154,20 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
                             String name = response.getJSONArray("plug").getJSONObject(i).getString("name");
                             PageItem plug = new PageItem(name, id);//("タイトル","id")
                             adapter.addItem(plug);
+
+                            //--設定のON/OFFを表す
+                            Boolean[] config ={true,true,false,false,false,false,false,false,false};
+                            configItem.cList.add(config);//追加
+                            //電源のOn/Off切替ボタンのﾃｷｽﾄをswitch_flgの値に応じて変更する
+//                            int switch_flg = response.getJSONArray("plug").getJSONObject(i).getInt("switch_flg");
+//                            Button btn = (Button) findViewById(R.id.StartButton);
+//                            if (switch_flg == 0) {
+//                                btn.setText("電源を入れる");
+//                            } else {
+//                                btn.setText("電源を切る");
+//                            }
                         }
+
 //                        Toast.makeText(getApplicationContext(), String.valueOf(count) + ", " + response.getString("plug_id_1"), Toast.LENGTH_LONG).show();
                         pager.setAdapter(adapter);
                         //タブ切り替えた時　 Logを残すためのメソッド -------------------------------

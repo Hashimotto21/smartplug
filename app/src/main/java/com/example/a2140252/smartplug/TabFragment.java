@@ -35,7 +35,9 @@ import cz.msebera.android.httpclient.Header;
 public class TabFragment extends Fragment {//Fragment
 
    //10/21
-    private int id = 0;
+    private String id = "";
+
+    private int position;//Listの添え字
 
     @Override
     public void onCreate(Bundle savedInstanceState) {//1回のみ
@@ -45,7 +47,8 @@ public class TabFragment extends Fragment {//Fragment
 
         if (args != null) {
 
-            id = args.getInt("id");
+            position = Integer.parseInt(args.getSerializable("position").toString());//Tab位置　添え字になる
+            id = args.getString("id");
             Log.d("TabF","onCreate() 渡されたタブid : "+id);
         }
         ////--------------
@@ -79,7 +82,7 @@ public class TabFragment extends Fragment {//Fragment
         public void onClick(View v) {
 
             Intent intent = new Intent(getActivity(), TimerActivity.class); //Next Activity
-            intent.putExtra("plug_id", "すまーと");
+            intent.putExtra("plug_id", id);
             startActivity(intent);
         }
     };
@@ -90,18 +93,8 @@ public class TabFragment extends Fragment {//Fragment
 
             Intent intent = new Intent(getActivity(), ConfigActivity.class); //Next Activity
             intent.putExtra("plug_id", id);
+            intent.putExtra("no", position);//添え字
             startActivity(intent);
-        }
-    };
-
-    View.OnClickListener stop_click = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            MyHttpClient client = new MyHttpClient();
-            client.setParam("switch_flg", "0");
-            Log.d("onClick", "通信前");
-            client.toggle("http://smartplug.php.xdomain.jp/switch_bool_fone_test.php");
-            client.removeParam("switch_flg");
         }
     };
 
@@ -109,9 +102,24 @@ public class TabFragment extends Fragment {//Fragment
         @Override
         public void onClick(View v) {
             MyHttpClient client = new MyHttpClient();
-            client.setParam("switch_flg", "1");
+            client.msg = "start";
+            client.setParam("switch_flg", true);
             Log.d("onClick", "通信前");
             client.toggle("http://smartplug.php.xdomain.jp/switch_bool_fone_test.php");
+            //client.toggle("http://smartplug.php.xdomain.jp/switch_flag.php");
+            client.removeParam("switch_flg");
+        }
+    };
+
+    View.OnClickListener stop_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MyHttpClient client = new MyHttpClient();
+            client.msg = "stop";
+            client.setParam("switch_flg", false);
+            Log.d("onClick", "通信前");
+            client.toggle("http://smartplug.php.xdomain.jp/switch_bool_fone_test.php");
+            //client.toggle("http://smartplug.php.xdomain.jp/switch_flag.php");
             client.removeParam("switch_flg");
         }
     };
@@ -122,7 +130,6 @@ public class TabFragment extends Fragment {//Fragment
         final RequestParams params = new RequestParams(); //リクエストパラメータ
         String msg;
 
-
         public void toggle(String urlString) {
             url = urlString;
             AsyncHttpClient client = new AsyncHttpClient(); //通信準備
@@ -130,17 +137,27 @@ public class TabFragment extends Fragment {//Fragment
                 @Override
                 public void onSuccess(int i, Header[] headers, byte[] bytes) {
                     Log.d("TabFragment", "成功");
+                    if (msg.equals("start")) {
+                        Toast.makeText(getContext(), "電源を入れました！", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getContext(), "電源を切りました。", Toast.LENGTH_LONG).show();
+                    }
                 }
 
                 @Override
                 public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
                     Log.d("TabFragment", "失敗");
+                    Toast.makeText(getContext(), "通信に失敗しました。\n時間をおいてもう一度お試しください。", Toast.LENGTH_LONG).show();
                 }
             });
 
         }
 
         public void setParam(String key, String value) {
+            params.put(key, value);
+        }
+
+        public void setParam(String key, boolean value) {
             params.put(key, value);
         }
 

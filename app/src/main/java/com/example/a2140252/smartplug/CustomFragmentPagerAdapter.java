@@ -43,6 +43,7 @@ public class CustomFragmentPagerAdapter extends FragmentPagerAdapter {
 
         Bundle bundle = new Bundle();
         bundle.putString("id", id);//idを渡す  Log記録のために
+        bundle.putInt("position", position);
 
         Log.d("CustomF","getItem() :"+(position+1)+"つ目/id"+id);
         tabFragment.setArguments(bundle);

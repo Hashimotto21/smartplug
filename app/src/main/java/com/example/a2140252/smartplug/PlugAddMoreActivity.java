@@ -1,5 +1,6 @@
 package com.example.a2140252.smartplug;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -88,14 +89,24 @@ public class PlugAddMoreActivity extends AppCompatActivity {
         }
 
 
-//        MyHttpClient client = new MyHttpClient();
-//        //client.setParam("plug_id", plug_id);
-//        Log.d("onClick", "通信前");
-//        client.plugAdd("http://smartplug.php.xdomain.jp/get_graph_data.php");
-//        client.removeParam("user_id");
+        MyHttpClient client = new MyHttpClient();
+        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+        String user_id = data.getString("user_id", "");
+        client.setParam("user_id", user_id);
+        client.setParam("plug_id", id);
+        client.setParam("name", name);
+        Log.d("onClick", "通信前");
+        client.plugAdd("http://smartplug.php.xdomain.jp/register_plug.php");
+        client.removeParam("user_id");
+        client.removeParam("plug_id");
+        client.removeParam("name");
 
-        PageItem plug3 = new PageItem(id,name); //11/07変更
-        intent.putExtra("newPlug", plug3);
+//        PageItem plug = new PageItem(name, id); //11/07変更
+//        CustomFragmentPagerAdapter adapter = new CustomFragmentPagerAdapter(getSupportFragmentManager());
+//        adapter.addItem(plug);
+//        intent.putExtra("newPlug", plug);
+        intent.putExtra("id", id);
+        intent.putExtra("name", name);
 
         setResult(RESULT_OK, intent);//処理成功
         finish();//戻るボタンで戻らせない
@@ -116,9 +127,11 @@ public class PlugAddMoreActivity extends AppCompatActivity {
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     try {
                         if (response.getString("status").equals("true")) {
-
+                            msg = "プラグが登録されました。";
+                            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                         } else {
-
+                            msg = "登録されませんでした。";
+                            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         msg = "システムエラー";
