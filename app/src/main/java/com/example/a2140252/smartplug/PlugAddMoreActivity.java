@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.a2140252.smartplug.dataPackage.UserData;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -34,6 +36,8 @@ public class PlugAddMoreActivity extends AppCompatActivity {
 
     ArrayList<PageItem> list;
 
+    //UserData userData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +45,16 @@ public class PlugAddMoreActivity extends AppCompatActivity {
 
         //ID
         plugid =(EditText) findViewById(R.id.IDtextView);
-
         //コンセント名
         plugname=(EditText) findViewById(R.id.PASStextView);
+
+        //ToolBarを表示する
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        //userData=(UserData) this.getApplication();
 
         //追加ボタン押した
         findViewById(R.id.Nextbutton).setOnClickListener(new View.OnClickListener() {
@@ -74,7 +85,6 @@ public class PlugAddMoreActivity extends AppCompatActivity {
         String id = plugid.getText().toString().trim();//id
         String name = plugname.getText().toString().trim();//タブ名
 
-
         Intent intent = getIntent();
         list = (ArrayList<PageItem>) intent.getSerializableExtra("list");//ArrayListを受け取る
 
@@ -88,14 +98,12 @@ public class PlugAddMoreActivity extends AppCompatActivity {
             }
         }
 
-
         MyHttpClient client = new MyHttpClient();
-        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-        String user_id = data.getString("user_id", "");
+        SharedPreferences data = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
+        String user_id =data.getString("user_id", "");
         client.setParam("user_id", user_id);
         client.setParam("plug_id", id);
         client.setParam("name", name);
-        Log.d("onClick", "通信前");
         client.plugAdd("http://smartplug.php.xdomain.jp/register_plug.php");
         client.removeParam("user_id");
         client.removeParam("plug_id");
@@ -160,6 +168,44 @@ public class PlugAddMoreActivity extends AppCompatActivity {
 
     }
 
+    //ハンバーガーメニュー
+    public boolean onCreateOptionsMenu(Menu menu) {
 
- 
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+
+        switch (item.getItemId()) {
+            case R.id.menu_user:
+                intent = new Intent(this, UserConfigActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.menu_add:
+                intent = new Intent(this, PlugAddMoreActivity.class);
+//                list= adapter.getList();
+//                intent.putExtra("list",list);//ArrayListを渡す
+//
+//                startActivityForResult(intent, ADDMORE_CODE);//起動先からデータを返してもらえる
+                return true;
+            case R.id.menu_del:
+                intent = new Intent(this, PlugDeleteActivity.class);
+//                list= adapter.getList();
+//                intent.putExtra("list",list);//ArrayListを渡す
+//
+//                startActivityForResult(intent,DELETE_CODE);
+                return true;
+            case R.id.menu_logout:
+                intent = new Intent(this, LogoutActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
 }

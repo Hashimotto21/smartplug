@@ -1,8 +1,12 @@
 package com.example.a2140252.smartplug;
 
+import android.app.Application;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.provider.ContactsContract;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.PagerTitleStrip;
@@ -12,12 +16,16 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.a2140252.smartplug.dataPackage.PlugData;
+import com.example.a2140252.smartplug.dataPackage.UserData;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -47,7 +55,8 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
 
     ViewPager pager;
 
-    ConfigItem configItem;
+    //UserData userData;
+    //SwitchFlagList switchFlagList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,16 +83,52 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
         list = adapter.getList();//ArrayList生成
         //---------------------------------
 
-        configItem=(ConfigItem) this.getApplication();
+        //userData=(UserData) this.getApplication();
 
-        SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-        String user_id = data.getString("user_id", "");
-        MyHttpClient client = new MyHttpClient();
-        client.setParam("user_id", user_id);
-        Log.d("onClick", "通信前");
-        client.getGraphData("http://smartplug.php.xdomain.jp/get_graph_data.php");
-        client.removeParam("user_id");
+        //adapterにplugを追加
+//        for(int i = 0; i <  userData.getPlugData().length; i++) {
+//            PlugData plugData = userData.getPlugData(i);
+//            PageItem plug = new PageItem( plugData.getPlugName(), plugData.getPlugId());//("タイトル","id")
+//            adapter.addItem(plug);
+//        }
 
+        MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+        SQLiteDatabase database = helper.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            SharedPreferences preferences = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
+            String user_id = preferences.getString("user_id", "");
+            cursor = database.query("plugs", new String[]{"id, name"}, "user_id=?", new String[]{user_id}, null, null, null, null);
+            if(cursor.moveToFirst()) {
+                do {
+                    int plug_idIndex = cursor.getColumnIndex("id");
+                    int nameIndex = cursor.getColumnIndex("name");
+
+                    String plug_id = cursor.getString(plug_idIndex);
+                    String name = cursor.getString(nameIndex);
+
+                    PageItem plug = new PageItem(name, plug_id);
+                    adapter.addItem(plug);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            database.close();
+            cursor.close();
+        }
+
+        pager.setAdapter(adapter);
+        //タブ切り替えた時　 Logを残すためのメソッド -------------------------------
+        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (ViewPager.SCROLL_STATE_IDLE == state) {//ViewPagerの位置が落ち着いた状態が0(= CROLL_STATE_IDLE)
+
+                    Log.d("ViewPager", "現在選択中のタブ" + ( pager.getCurrentItem() + 1) + "つ目 -------");
+
+                }
+            }
+        });
 
     }//onCreate()
 
@@ -103,9 +148,48 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
                     //adapter.addItem((PageItem) data.getSerializableExtra("newPlug"));
                     pager.setAdapter(adapter);
 
-                    //設定ボタンのON/OFF
-                    Boolean[] config3 ={false,false,false,false,false,false,false,false,false};
-                    configItem.cList.add(config3);
+//                    int length = userData.getPlugData().length;
+//                    PlugData[] newPlugData = new PlugData[length + 1];
+//                    for(int i = 0; i < length; i++) {
+//                        newPlugData[i] = userData.getPlugData(i);
+//                    }
+//                    userData.setPlugData(newPlugData);
+//                    userData.getPlugData(length - 1).setPlugId(id);
+//                    userData.getPlugData(length - 1).setPlugName(name);
+
+                    //SQLite
+                    String plug_id = data.getStringExtra("plug_id");
+                    MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+                    SQLiteDatabase database = helper.getWritableDatabase();
+                    try {
+                        //テーブルの追加処理
+
+                        ContentValues values = new ContentValues();
+                        values.put("id", plug_id);
+                        values.put("name", data.getStringExtra("name"));
+                        database.insert("plugs", "0", values);
+
+                        values.clear();
+                        values.put("plug_id", plug_id);
+                        values.put("time_flg", 0);
+                        database.insert("timers", null, values);
+
+                        String[] configs = {"power_notice", "power_alert", "power_auto",
+                                "temperature_notice", "temperature_alert", "temperature_auto",
+                                "accident_notice", "accident_alert", "accident_auto"};
+                        values.clear();
+                        values.put("plug_id", plug_id);
+                        for(int i = 0; i < configs.length; i++) {
+                            values.put(configs[i], 1);
+                        }
+                        database.insert("configs", null, values);
+                    } finally {
+                        database.close();
+                    }
+
+                    //serverにpowerTableのデータを取りに行く？
+
+
                     Log.d("onActivityResult", "タブ追加後★RESULT_OK");
                 }
                 break;
@@ -121,94 +205,40 @@ public class HomeActivity extends AppCompatActivity {//AppCompatActivity Fragmen
                     adapter.notifyDataSetChanged();
                     pager.setAdapter(adapter);
 
-                    //設定ON/OFFの情報も削除
-                    configItem.cList.remove(d);
+//                    int index = userData.findPlugData(data.getStringExtra("plug_id"));
+//                    //plugDataを削除
+//                    userData.setPlugData(null, index);;
+//                    //PlugData配列を整理
+//                    PlugData[] newPlugData = new PlugData[userData.getPlugData().length - 1];
+//                    int j = 0;
+//                    for(int i = 0; i < userData.getPlugData().length; i++) {
+//                        if(userData.getPlugData(i) != null) {
+//                            newPlugData[j] = userData.getPlugData(i);
+//                            j++;
+//                        }
+//                    }
+//                    userData.setPlugData(newPlugData);
+
+                    //SQLite
+                    String plug_id = data.getStringExtra("plug_id");
+                    MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+                    SQLiteDatabase database = helper.getWritableDatabase();
+                    try {
+                        String[] whereArgs = new String[]{plug_id};
+                        database.delete("plugs", "id=?", whereArgs);
+                        database.delete("timers", "plug_id=?", whereArgs);
+                        database.delete("configs", "plug_id=?", whereArgs);
+                        database.delete("power", "plug_id=?", whereArgs);
+                    } finally {
+                        database.close();
+                    }
+
                     Log.d("onActivityResult", "タブ削除後★RESULT_OK");
                 }
                 break;
             default:
                 break;
         }
-    }
-
-    public class MyHttpClient {
-
-        String url; //接続先url
-        final RequestParams params = new RequestParams(); //リクエストパラメータ
-        String msg;
-
-
-        public void getGraphData(String urlString) {
-            url = urlString;
-            AsyncHttpClient client = new AsyncHttpClient(); //通信準備
-            client.post(url, params, new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    try {
-                        //Toast.makeText(getApplicationContext(), response.getJSONObject(0).get("plug_id_1").toString(), Toast.LENGTH_LONG).show();
-                        //Log.d("HomeActivity", response.getJSONArray("plug").getJSONObject(0).getString("id"));
-                        int count = Integer.parseInt(response.getString("count"));
-                        //プラグ追加
-                        for (int i = 0; i < count; i++) {
-                            String id = response.getJSONArray("plug").getJSONObject(i).getString("id");
-                            String name = response.getJSONArray("plug").getJSONObject(i).getString("name");
-                            PageItem plug = new PageItem(name, id);//("タイトル","id")
-                            adapter.addItem(plug);
-
-                            //--設定のON/OFFを表す
-                            Boolean[] config ={true,true,false,false,false,false,false,false,false};
-                            configItem.cList.add(config);//追加
-                            //電源のOn/Off切替ボタンのﾃｷｽﾄをswitch_flgの値に応じて変更する
-//                            int switch_flg = response.getJSONArray("plug").getJSONObject(i).getInt("switch_flg");
-//                            Button btn = (Button) findViewById(R.id.StartButton);
-//                            if (switch_flg == 0) {
-//                                btn.setText("電源を入れる");
-//                            } else {
-//                                btn.setText("電源を切る");
-//                            }
-                        }
-
-//                        Toast.makeText(getApplicationContext(), String.valueOf(count) + ", " + response.getString("plug_id_1"), Toast.LENGTH_LONG).show();
-                        pager.setAdapter(adapter);
-                        //タブ切り替えた時　 Logを残すためのメソッド -------------------------------
-                        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                            //findViewById(R.id.pager).addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                            @Override
-                            public void onPageScrollStateChanged(int state) {
-                                if (ViewPager.SCROLL_STATE_IDLE == state) {//ViewPagerの位置が落ち着いた状態が0(= CROLL_STATE_IDLE)
-
-                                    Log.d("ViewPager", "現在選択中のタブ" + ( pager.getCurrentItem() + 1) + "つ目 -------");
-
-                                }
-                            }
-                        });
-
-//
-                    } catch (Exception e) {
-                        msg = "システムエラー";
-                        Toast.makeText(getApplicationContext(), msg + e.toString(), Toast.LENGTH_LONG).show();
-                        Log.d("Exception", e.toString());
-                    }
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers,  String errorStrings, Throwable throwable) {
-                    super.onFailure(statusCode, headers, errorStrings, throwable);
-                    msg = "接続エラー";
-                    Toast.makeText(getApplicationContext(), errorStrings, Toast.LENGTH_LONG).show();
-                }
-            });
-
-        }
-
-        public void setParam(String key, String value) {
-            params.put(key, value);
-        }
-
-        public void removeParam(String key) {
-            params.remove(key);
-        }
-
     }
 
     //ハンバーガーメニュー

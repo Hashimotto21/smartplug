@@ -1,9 +1,11 @@
 package com.example.a2140252.smartplug;
 
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -68,6 +70,26 @@ public class UserAddActivity extends AppCompatActivity {
             Toast.makeText(this, "Passwordを入力してください。", Toast.LENGTH_SHORT).show();
             return false;
         }
+        if (id.getText().toString().getBytes().length > 16) {
+            if (id.getText().toString().length() > 16) {
+                Toast.makeText(this, "Idは半角英数16文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else if (id.getText().toString().length() <= 10) {
+                Toast.makeText(this, "Idは全角8文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Idは16byte以内で入力してください。", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        }
+        if (pass.getText().toString().getBytes().length > 16) {
+            if (pass.getText().toString().length() > 16) {
+                Toast.makeText(this, "Passwordは半角英数16文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else if (pass.getText().toString().length() <= 10) {
+                Toast.makeText(this, "Passwordは全角8文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Passwordは16byte以内で入力してください。", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        }
         return true;
     }
 
@@ -96,14 +118,17 @@ public class UserAddActivity extends AppCompatActivity {
                             Toast.makeText(UserAddActivity.this, status + msg, Toast.LENGTH_LONG).show();
 
                             //ユーザIDを保存
-                            SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = data.edit();
                             id = (EditText) findViewById(R.id.IDtextView);
-                            editor.putString("user_id", id.getText().toString());
+                            String user_id = id.getText().toString();
+                            SharedPreferences preferences = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("user_id", user_id);
                             editor.apply();
 
+                            register_users(user_id);
+
                             Intent intent = new Intent(getApplication(), PlugAddActivity.class); //プラグ追加Activity
-                            intent.putExtra("user_id", id.getText().toString());
+                            intent.putExtra("user_id", user_id);
                             startActivity(intent);
                             UserAddActivity.this.finish();
                         }
@@ -132,5 +157,25 @@ public class UserAddActivity extends AppCompatActivity {
             params.remove(key);
         }
 
+    }
+
+    private void register_users(String user_id) {
+        //SQLite
+        MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+        SQLiteDatabase database = helper.getWritableDatabase();
+        try{
+            EditText pass = (EditText) findViewById(R.id.PASStextView);
+
+            ContentValues insertValues = new ContentValues();
+            //String user_id = response.getString("user_id");
+            insertValues.put("id", user_id);
+            insertValues.put("password", pass.getText().toString());
+            long id = database.update("users", insertValues, "id=?", new String[]{user_id});
+            if(id == -1) {
+                database.insert("users", user_id, insertValues);
+            }
+        }finally{
+            database.close();
+        }
     }
 }

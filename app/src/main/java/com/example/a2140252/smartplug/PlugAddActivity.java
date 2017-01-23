@@ -1,8 +1,10 @@
 package com.example.a2140252.smartplug;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -99,18 +101,42 @@ public class PlugAddActivity extends AppCompatActivity {
                             msg = "入力されたプラグIDは既に登録されています。";
                             Toast.makeText(PlugAddActivity.this, status + msg, Toast.LENGTH_LONG).show();
                         } else {
-                            //PlugIdは保持したくない
-//                            SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
-//                            String user_id = data.getString("user_id", "");
-//                            data = getSharedPreferences(user_id, Context.MODE_PRIVATE);
-//                            SharedPreferences.Editor editor = data.edit();
-//                            int count = data.getInt("count", 0);
-//                            EditText id = (EditText) findViewById(R.id.IDtextView);
-//                            EditText name = (EditText) findViewById(R.id.NametextView);
-//                            editor.putString("plug_id_" + String.valueOf(count), id.getText().toString());
-//                            editor.putString("plug_name_" + String.valueOf(count), name.getText().toString());
-//                            editor.putInt("count", count + 1);
-//                            editor.apply();
+                            MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+                            SQLiteDatabase database = helper.getWritableDatabase();
+                            try {
+                                ContentValues values = new ContentValues();
+                                EditText id = (EditText) findViewById(R.id.IDtextView);
+                                String plug_id = id.getText().toString();
+                                EditText name = (EditText) findViewById(R.id.NametextView);
+                                SharedPreferences preferences = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
+
+                                //plugs Table
+                                values.put("id", plug_id);
+                                values.put("name", name.getText().toString());
+                                values.put("user_id", preferences.getString("user_id", ""));
+                                database.insert("plugs", null, values);
+
+                                //timers Table
+                                values.clear();
+                                values.put("plug_id", plug_id);
+                                values.put("ontime", "");
+                                values.put("offtime", "");
+                                values.put("time_flg", 0);
+                                database.insert("timers", null, values);
+
+                                //configs Table
+                                String[] configs = {"power_notice", "power_alert", "power_auto",
+                                        "temperature_notice", "temperature_alert", "temperature_auto",
+                                        "accident_notice", "accident_alert", "accident_auto"};
+                                values.clear();
+                                values.put("plug_id", plug_id);
+                                for(int i = 0; i < configs.length; i++) {
+                                    values.put(configs[i], 1);
+                                }
+                                database.insert("configs", "1", values);
+                            } finally {
+                                database.close();
+                            }
 
                             msg = "登録されました。";
                             Toast.makeText(PlugAddActivity.this, status + msg, Toast.LENGTH_LONG).show();

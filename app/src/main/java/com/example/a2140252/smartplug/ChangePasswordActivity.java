@@ -1,8 +1,10 @@
 package com.example.a2140252.smartplug;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -50,7 +52,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 return;
             }
 
-            SharedPreferences data = getSharedPreferences("DataSave", Context.MODE_PRIVATE);
+            SharedPreferences data = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
             String user_id = data.getString("user_id", "null");
             if (user_id.equals("null")) {
                 return;
@@ -92,6 +94,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
             Toast.makeText(this, "現在のPASSWORDと同じPASSWORDには変更できません。", Toast.LENGTH_SHORT).show();
             return false;
         }
+        if (newpass.getText().toString().getBytes().length > 16) {
+            if (newpass.getText().toString().length() > 16) {
+                Toast.makeText(this, "Passwordは半角英数16文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else if (newpass.getText().toString().length() <= 10) {
+                Toast.makeText(this, "Passwordは全角8文字以内で入力してください。", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Passwordは16byte以内で入力してください。", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        }
         return true;
     }
 
@@ -120,6 +132,19 @@ public class ChangePasswordActivity extends AppCompatActivity {
                         } else {
                             msg = "PASSWORDを変更しました。";
                             Toast.makeText(ChangePasswordActivity.this, msg, Toast.LENGTH_LONG).show();
+
+                            MyOpenHelper helper = new MyOpenHelper(getApplicationContext());
+                            SQLiteDatabase database = helper.getWritableDatabase();
+                            try {
+                                ContentValues values = new ContentValues();
+                                EditText newPass = (EditText) findViewById(R.id.NewPasstextView);
+                                values.put("password", newPass.getText().toString());
+                                SharedPreferences preferences = getSharedPreferences("smartplug", Context.MODE_PRIVATE);
+
+                                database.update("users", values, "id=?", new String[]{preferences.getString("user_id", "")});
+                            } finally {
+                                database.close();
+                            }
                         }
                     } catch (Exception e) {
                         msg = "システムエラー";

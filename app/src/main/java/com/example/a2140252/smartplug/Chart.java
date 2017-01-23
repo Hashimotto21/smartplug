@@ -1,8 +1,20 @@
 package com.example.a2140252.smartplug;
 
+import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+import com.example.a2140252.smartplug.dataPackage.GraphData;
+import com.example.a2140252.smartplug.dataPackage.GraphDetailData;
+import com.example.a2140252.smartplug.dataPackage.PlugData;
+//import com.example.a2140252.smartplug.dataPackage.UserData;
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -12,120 +24,133 @@ import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by 2140306 on 2016/10/19.
  */
 public class Chart {
+    private static final int MAX_MONTH_COUNT = 12;         //月の数(X軸の数)
+    private static final int MAX_YEAR_COUNT = 3;
+    String[] years = new String[MAX_YEAR_COUNT];
+    ArrayList<String>[] months = new ArrayList[MAX_YEAR_COUNT];
+    ArrayList<Integer>[] powers = new ArrayList[MAX_YEAR_COUNT];
 
-    private CombinedChart mChart;               //棒折れ線グラフ
-    private final int itemcount = 12;         //月の数(X軸の数)
+    public Chart(Context context, String id) {
+        //SQLite
+        MyOpenHelper helper = new MyOpenHelper(context);
+        SQLiteDatabase database = helper.getReadableDatabase();
+        Cursor c = null;
 
-    public Chart (CombinedChart Chart) {
-        mChart = Chart;
-        mChart.setDescription("CombinedChart");
-        mChart.setBackgroundColor(Color.WHITE);
-        mChart.setDrawGridBackground(false);
-        mChart.setDrawBarShadow(false);
-        mChart.setDoubleTapToZoomEnabled(false);
+        //データの取得
+        try {
+            final String[] columns = new String[]{"date", "power"};
+            String where = "plug_id=?";
+            c = database.query("power",columns,where,new String[]{id}, null,null,null,null);
+            int i = 0;
+            if(c.moveToFirst()){
+                int dateIndex = c.getColumnIndex("date");
+                int powerIndex = c.getColumnIndex("power");
+                String year = "";
+                do{
+                    String date = c.getString(dateIndex);
+                    String newYear = date.substring(0, 4);
+                    if(year.equals("")) {
+                        year = newYear;
+                        years[i] = year;
 
-        // draw bars behind lines
-        mChart.setDrawOrder(new CombinedChart.DrawOrder[] {
-                CombinedChart.DrawOrder.BAR, CombinedChart.DrawOrder.BUBBLE, CombinedChart.DrawOrder.CANDLE, CombinedChart.DrawOrder.LINE, CombinedChart.DrawOrder.SCATTER
-        });
+                        months[i] = new ArrayList<>();
+                        powers[i] = new ArrayList<>();
+                    } else if(!year.equals(newYear)) {
+                        year = newYear;
+                        i++;
+                        years[i] = year;
 
-        //右軸
-        YAxis rightAxis = mChart.getAxisRight();
-        rightAxis.setDrawGridLines(false);
-        rightAxis.setAxisMinValue(0f); // this replaces setStartAtZero(true)
+                        months[i] = new ArrayList<>();
+                        powers[i] = new ArrayList<>();
+                    }
+                    String month = date.substring(4);
+                    int power = c.getInt(powerIndex);
 
-        //左軸
-        YAxis leftAxis = mChart.getAxisLeft();
-        leftAxis.setDrawGridLines(false);
-        leftAxis.setAxisMinValue(0f); // this replaces setStartAtZero(true)
+                    Log.w("power", String.valueOf(power));
+                    months[i].add(month);
+                    powers[i].add(power);
+                }while(c.moveToNext());
+            }
+        }finally {
+            database.close();
+            c.close();
+        }
+}
 
-        //横軸の表示
-        XAxis xAxis = mChart.getXAxis();
+    public void createLineChart(LineChart lineChart) {
+        lineChart.setDescription("月別消費電力グラフ");
+
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(true);
+        lineChart.setDrawGridBackground(true);
+        lineChart.setEnabled(true);
+        //グラフをタッチ操作するか
+        lineChart.setTouchEnabled(true);
+        //ダブルタップでズームするか
+        lineChart.setDoubleTapToZoomEnabled(false);
+        //指二本でズームするか
+        lineChart.setScaleEnabled(true);
+        lineChart.getLegend().setEnabled(true);
+
+        //X軸周り
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setDrawLabels(true);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setDrawGridLines(true);
+        xAxis.setSpaceBetweenLabels(0);
 
+        lineChart.setData(createLineChartData());
+        lineChart.invalidate();
+        // アニメーション
+        lineChart.animateY(2000, Easing.EasingOption.EaseInBack);
+    }
+
+    // LineChartの設定
+    private LineData createLineChartData() {
+        ArrayList<ILineDataSet> ILineDataSets = new ArrayList<>();
+
+        // X軸
         ArrayList<String> xValues = new ArrayList<>();
-        xValues.add("1月");
-        xValues.add("2月");
-        xValues.add("3月");
-        xValues.add("4月");
-        xValues.add("5月");
-        xValues.add("6月");
-        xValues.add("7月");
-        xValues.add("8月");
-        xValues.add("9月");
-        xValues.add("10月");
-        xValues.add("11月");
-        xValues.add("12月");
+        for (int i = 1; i <= MAX_MONTH_COUNT; i++) {
+            xValues.add(String.valueOf(i) + "月");
+        }
 
-        CombinedData data = new CombinedData(xValues);
+        //一年ごとのループ
+        for(int i = 0; i < years.length; i++) {
+            ArrayList<Entry> values = new ArrayList<>();
+            //一年間のデータ分ループ
+            for(int j = 0; j < months[i].toArray().length; j++) {
+                int month = Integer.parseInt(months[i].get(j)) - 1;
+                values.add(new Entry(powers[i].get(j), month));
+            }
+            ILineDataSets.add(createLineDataSet(values, years[i], i));
+        }
 
-        data.setData(generateLineData());
-        data.setData(generateBarData());
-        mChart.setData(data);
-        mChart.invalidate();
+        LineData LineData = new LineData(xValues,ILineDataSets);
+        return LineData;
     }
 
-    //折れ線グラフデータ生成
-    private LineData generateLineData() {
-
-        LineData d = new LineData();
-
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        //データ追加（データ、X軸の値？）
-        for (int index = 0; index < itemcount; index++)
-            entries.add(new Entry(getRandom(15, 10), index));
-
-        //（データの集合、表示するデータの説明）
-        LineDataSet set = new LineDataSet(entries, "Line DataSet");
-        set.setColor(Color.rgb(240, 238, 70));
-        set.setLineWidth(2.5f);
-        set.setCircleColor(Color.rgb(240, 238, 70));
-        set.setCircleRadius(5f);
-        set.setFillColor(Color.rgb(240, 238, 70));
-        //set.setDrawCubic(true);
-        set.setDrawValues(true);
-        set.setValueTextSize(10f);
-        set.setValueTextColor(Color.rgb(240, 238, 70));
-
-        //データの説明の表示位置
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        d.addDataSet(set);
-
-        return d;
-    }
-
-    //棒グラフデータ生成
-    private BarData generateBarData() {
-
-        BarData d = new BarData();
-
-        ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
-
-        for (int index = 0; index < itemcount; index++)
-            entries.add(new BarEntry(getRandom(15, 30), index));
-
-        BarDataSet set = new BarDataSet(entries, "Bar DataSet");
-        set.setColor(Color.rgb(60, 220, 78));
-        set.setValueTextColor(Color.rgb(60, 220, 78));
-        set.setValueTextSize(10f);
-        d.addDataSet(set);
-
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        return d;
-    }
-
-    //乱数発生（テストグラフ用）
-    private float getRandom(float range, float startsfrom) {
-        return (float) (Math.random() * range) + startsfrom;
+    private ILineDataSet createLineDataSet(ArrayList<Entry> values, String description, int index) {
+        LineDataSet dataSet = new LineDataSet(values, description);
+        int color = ColorTemplate.COLORFUL_COLORS[index];
+        dataSet.setDrawValues(true);
+        dataSet.setValueTextSize(10f);
+        dataSet.setValueTextColor(color);
+        dataSet.setColor(color);
+        dataSet.setLineWidth(2.5f);
+        dataSet.setCircleColor(color);
+        dataSet.setCircleRadius(5f);
+        dataSet.setFillColor(color);
+        return dataSet;
     }
 }
